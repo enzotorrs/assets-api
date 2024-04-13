@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { CreateAssetDto } from './dto/create-asset.dto';
+import { CreateAssetDto, UpdateAssetDto } from './asset.dto';
 import { AssetRepository } from './repositories/asset.repository';
 import { Asset } from './entities/asset.entity';
 
