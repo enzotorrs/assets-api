@@ -85,7 +85,7 @@ describe('AssetsService', () => {
         HttpStatus.BAD_REQUEST,
       ),
     );
-  })
+  });
 
   it('should throw bad request error when parent asset is not a folder', () => {
     const parentAsset = new Asset();
@@ -102,4 +102,32 @@ describe('AssetsService', () => {
       ),
     );
   });
+
+  it('should throw bad request error when asset to update not exists', ()=>{
+    expect(async () => {
+      await service.update(1,{ name: 'test'});
+    }).rejects.toThrow(
+      new HttpException(
+        'asset with this given id not exists',
+        HttpStatus.BAD_REQUEST,
+      )
+    );
+  })
+
+  it('should throw bad request error when parent asset id is equal to asset id', ()=>{
+    const parentAsset = new Asset();
+    parentAsset.name = 'teste parent asset';
+    parentAsset.folder = true;
+    parentAsset.id = 1
+    assetRepositoryMock.assets.push(parentAsset);
+
+    expect(async () => {
+      await service.update(1,{ name: 'test', parentAssetId: 1});
+    }).rejects.toThrow(
+      new HttpException(
+        'parent asset id cannot be same as asset id',
+        HttpStatus.BAD_REQUEST,
+      )
+    );
+  })
 });
