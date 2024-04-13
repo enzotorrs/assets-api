@@ -69,11 +69,24 @@ describe('AssetsService', () => {
     expect(assetStored.name).toBe('teste asset');
     expect(assetStored2.name).toBe('teste asset 2');
   });
+
   it('should add new asset when is valid', async () => {
     expect(assetRepositoryMock.assets.length).toBe(0);
     expect(await service.create({ name: 'teste' })).toBeInstanceOf(Asset);
     expect(assetRepositoryMock.assets.length).toBe(1);
   });
+
+  it('should throw bad request error when parent asset not exists', () => {
+    expect(async () => {
+      await service.create({ name: 'test', parentAssetId: 1 });
+    }).rejects.toThrow(
+      new HttpException(
+        'parent asset not exists or is not a folder',
+        HttpStatus.BAD_REQUEST,
+      ),
+    );
+  })
+
   it('should throw bad request error when parent asset is not a folder', () => {
     const parentAsset = new Asset();
     parentAsset.name = 'teste parent asset';
@@ -84,7 +97,7 @@ describe('AssetsService', () => {
       await service.create({ name: 'test', parentAssetId: 1 });
     }).rejects.toThrow(
       new HttpException(
-        'parent asset must be a folder',
+        'parent asset not exists or is not a folder',
         HttpStatus.BAD_REQUEST,
       ),
     );

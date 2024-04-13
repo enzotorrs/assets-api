@@ -7,7 +7,7 @@ import { Asset } from './entities/asset.entity';
 export class AssetsService {
   constructor(
     @Inject(AssetRepository) private assetRepository: AssetRepository,
-  ) {}
+  ) { }
 
   async create(assetToCreate: CreateAssetDto) {
     const asset = new Asset();
@@ -15,9 +15,9 @@ export class AssetsService {
       const parentAsset = await this.assetRepository.findById(
         assetToCreate.parentAssetId,
       );
-      if (!parentAsset.folder) {
+      if (!parentAsset || !parentAsset.folder) {
         throw new HttpException(
-          'parent asset must be a folder',
+          'parent asset not exists or is not a folder',
           HttpStatus.BAD_REQUEST,
         );
       }
