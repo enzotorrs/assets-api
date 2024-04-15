@@ -12,15 +12,9 @@ export class AssetsService {
   async create(assetToCreate: CreateAssetDto) {
     const asset = new Asset();
     if (assetToCreate.parentAssetId) {
-      const parentAsset = await this.assetRepository.findById(
+      const parentAsset = await this.getParentAsset(
         assetToCreate.parentAssetId,
       );
-      if (!parentAsset || !parentAsset.folder) {
-        throw new HttpException(
-          'parent asset not exists or is not a folder',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
       asset.parentAsset = parentAsset;
     }
     this.assetRepository.merge(asset, assetToCreate);
@@ -36,32 +30,43 @@ export class AssetsService {
   }
 
   async update(id: number, asset: UpdateAssetDto) {
-    const assetToUpdate = await this.assetRepository.findById(id);
-    if (!assetToUpdate){
-      throw new HttpException(
-        'asset with this given id not exists',
-        HttpStatus.BAD_REQUEST,
-      )
-    }
-    if(asset.parentAssetId === assetToUpdate.id){
-      throw new HttpException(
-        'parent asset id cannot be same as asset id',
-        HttpStatus.BAD_REQUEST,
-      )
-    }
+    const assetToUpdate = await this.getAssetToUpdate(id, asset);
     if (asset.parentAssetId) {
-      const parentAsset = await this.assetRepository.findById(
-        asset.parentAssetId,
-      );
-      if (!parentAsset || !parentAsset.folder) {
-        throw new HttpException(
-          'parent asset not exists or is not a folder',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
+      const parentAsset = await this.getParentAsset(asset.parentAssetId);
       assetToUpdate.parentAsset = parentAsset;
     }
     this.assetRepository.merge(assetToUpdate, asset);
     return this.assetRepository.save(assetToUpdate);
+  }
+
+  private async getParentAsset(id: number): Promise<Asset> {
+    const parentAsset = await this.assetRepository.findById(id);
+    if (!parentAsset || !parentAsset.folder) {
+      throw new HttpException(
+        'parent asset not exists or is not a folder',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return parentAsset;
+  }
+
+  private async getAssetToUpdate(
+    id: number,
+    asset: UpdateAssetDto,
+  ): Promise<Asset> {
+    const assetToUpdate = await this.assetRepository.findById(id);
+    if (!assetToUpdate) {
+      throw new HttpException(
+        'asset with this given id not exists',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (asset.parentAssetId === assetToUpdate.id) {
+      throw new HttpException(
+        'parent asset id cannot be same as asset id',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return assetToUpdate;
   }
 }
