@@ -25,7 +25,7 @@ export class UsersService {
 
   async update(id: number, user: UpdateUserDto) {
     const userToUpdate = await this.getUser(id);
-    userToUpdate.name = user.name;
+    userToUpdate.username = user.username;
     return this.userRepository.save(userToUpdate);
   }
 
