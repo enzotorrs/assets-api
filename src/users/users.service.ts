@@ -34,6 +34,10 @@ export class UsersService {
     return this.userRepository.remove(userToRemove);
   }
 
+  async findByName(username: string) {
+    return this.userRepository.findOneBy({ username });
+  }
+
   private async getUser(id: number) {
     const user = await this.userRepository.findOneBy({ id: id });
     if (!user) {
