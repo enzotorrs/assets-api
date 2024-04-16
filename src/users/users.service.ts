@@ -1,18 +1,32 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  forwardRef,
+} from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto } from './users.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @Inject(forwardRef(() => AuthService))
+    private readonly authService: AuthService,
   ) {}
 
   async create(user: CreateUserDto) {
-    return this.userRepository.save(user);
+    const hashedPassword = await this.authService.generateHashedPassword(
+      user.password,
+    );
+    user.password = hashedPassword;
+    const { password, ...newUser } = await this.userRepository.save(user);
+    return newUser;
   }
 
   async findAll() {
