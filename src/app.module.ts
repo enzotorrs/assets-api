@@ -5,17 +5,19 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     AssetsModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
+      host: process.env.DB_HOST,
       port: 3306,
-      username: 'root',
-      password: 'root',
-      database: 'main',
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_DATABASE,
       entities: [Asset, User],
       synchronize: true,
     }),
